@@ -9,32 +9,32 @@ fn main() {
     // println!("{:?}", boards);
 
     // First Star
-    let mut winning = false;
-    let mut i = 1;
+    let mut i = 5; // we can't have a winning board before 5 inputs
     let mut result = 0;
 
-    while !winning {
+    'outer: loop {
         for b in &boards {
-            winning |= b.is_winning(&inputs[0..i]);
-            if winning {
-                result = b.get_score(&inputs[0..i]) * inputs[i-1] as u32;
-                break;
+            if b.is_winning(&inputs[0..i]) {
+                result = b.get_score(&inputs[0..i]) * inputs[i - 1] as u32;
+                break 'outer;
             }
         }
-
         i += 1;
     }
 
     println!("The first answer id : {:?}", result);
 
     // Second Star
-    for i in 5..inputs.len() {
-        for b in &boards {
-            if !b.is_winning(&inputs[0..i-1]) && b.is_winning(&inputs[0..i]) {
+    let mut boards_winning = vec![false;boards.len()];
+    let mut i = 5;
+    while boards_winning.contains(&false) {
+        for (j, b) in boards.iter().enumerate() {
+            if !boards_winning[j] && b.is_winning(&inputs[0..i]) {
+                boards_winning[j] = true;
                 result = b.get_score(&inputs[0..i]) * inputs[i-1] as u32;
-                break;
             }
         }
+        i += 1;
     }
 
     println!("The second answer id : {:?}", result);
@@ -61,7 +61,6 @@ struct Board {
 impl Board {
     fn parse(string: &str) ->  Option<Self> {
         let mut board = Board { grid: [[0;5];5] };
-        let mut i = 0;
         for (i, l) in string.lines().enumerate() {
             for (j, n) in l.split_whitespace().enumerate() {
                 if i >= 5 || j >= 5 {
@@ -75,32 +74,18 @@ impl Board {
     }
 
     fn is_winning(&self, inputs: &[u8]) -> bool {
-        // Row
         for i in 0..5 {
+            let mut row_winning = true;
+            let mut col_winning = true;
             for j in 0..5 {
-                if !inputs.contains(&self.grid[i][j]) {
-                    break;
-                }
+                row_winning &= inputs.contains(&self.grid[i][j]);
+                col_winning &= inputs.contains(&self.grid[j][i]);
+            }
 
-                if j == 4 {
-                    return true;
-                }
+            if col_winning || row_winning {
+                return true;
             }
         }
-
-        // column
-        for j in 0..5 {
-            for i in 0..5 {
-                if !inputs.contains(&self.grid[i][j]) {
-                    break;
-                }
-
-                if i == 4 {
-                    return true;
-                }
-            }
-        }
-
         return false
     }
 
