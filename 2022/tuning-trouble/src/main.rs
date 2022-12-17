@@ -8,34 +8,23 @@ fn main() {
 
     // First Star
 
-    println!("The first answer is : {:?}", get_start_packet(&packet));
+    println!("The first answer is : {:?}", get_start_packet::<4>(&packet));
 
     // Second Star
 
-    println!("The second answer is : {:?}", get_start_message(&packet));
+    println!("The second answer is : {:?}", get_start_packet::<14>(&packet));
 }
 
 fn parse_input(data: String) -> String {
     data
 }
 
-fn get_start_packet(packet: &String) -> usize {
-    for i in 0..packet.len()-4 {
-        let substr = &packet[i..i+4];
+fn get_start_packet<const N: usize>(packet: &String) -> usize {
+    for i in 0..packet.len()-N {
+        let substr = &packet[i..i+N];
         let unique: HashSet<char> = HashSet::from_iter(substr.chars());
-        if unique.len() == 4 {
-            return i+4;
-        }
-    }
-    return 0;
-}
-
-fn get_start_message(packet: &String) -> usize {
-    for i in 0..packet.len()-14 {
-        let substr = &packet[i..i+14];
-        let unique: HashSet<char> = HashSet::from_iter(substr.chars());
-        if unique.len() == 14 {
-            return i+14;
+        if unique.len() == N {
+            return i+N;
         }
     }
     return 0;
